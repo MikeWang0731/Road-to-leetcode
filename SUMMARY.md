@@ -2,9 +2,9 @@
 
 ## 😀 LintCode新手必刷
 
-* [Page 1](README.md)
+* [基础数据结构](README.md)
 * [Page 2](lintcode-xin-shou-bi-shua/page-2.md)
 
 ## 🤩 LeetCode
 
-* [Page 3](leetcode/page-3.md)
+* [二分搜索法](leetcode/er-fen-sou-suo-fa.md)
