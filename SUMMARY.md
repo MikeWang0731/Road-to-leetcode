@@ -2,8 +2,8 @@
 
 ## 😀 LintCode新手必刷
 
-* [基础数据结构](README.md)
-* [Page 2](lintcode-xin-shou-bi-shua/page-2.md)
+* [👍 基础数据结构](README.md)
+* [👍 判断语句](lintcode-xin-shou-bi-shua/pan-duan-yu-ju.md)
 
 ## 🤩 LeetCode
 
