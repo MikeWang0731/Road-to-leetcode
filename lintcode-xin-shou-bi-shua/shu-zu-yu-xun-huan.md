@@ -357,13 +357,444 @@ public class Solution {
 }
 ```
 
+## 807 · 回文数 II<mark style="color:green;">（简单）</mark>
+
+### 题目要求
+
+判断一个非负整数 `n` 的二进制表示是否为回文数。
+
+```
+输入: n = 3
+输出: True
+解释:
+3 的二进制表示为：11。
+
+输入: n = 6
+输出: False
+解释:
+6 的二进制表示为：110。
+```
+
+### 解决方案&#x20;
+
+```java
+public class Solution {
+    /**
+     * @param n: non-negative integer n.
+     * @return: return whether a binary representation of a non-negative integer n is a palindrome.
+     */
+    public boolean isPalindrome(int n) {
+        // Write your code here
+        // Step 1: 十进制转换为二进制char类型Array
+        String decimal = Integer.toBinaryString(n);
+        char[] decimalChar = decimal.toCharArray();
+        // Step 2: 设置左起和右起两个指针，默认结果为false
+        int left = 0, right = decimalChar.length - 1;
+        boolean result = false;
+        // Step 3: 开始循环判断，两个指针分别向中间靠拢
+        while (left <= right) {
+            // 如果有一个匹配不上就直接返回false，或者所有的都能匹配上才返回true
+            if (decimalChar[left]==decimalChar[right]) {
+                result = true;
+            } else {
+                return false;
+            }
+            left += 1;
+            right -= 1;
+        }
+
+        return result;
+    }
+}
+```
+
+## 768 · 杨辉三角<mark style="color:green;">（简单）</mark><mark style="color:purple;">(需要复习)</mark>
+
+### 题目要求
+
+给一整数 `n`, 返回杨辉三角的前 `n 行`。
+
+```
+输入 : n = 4
+输出 :
+[
+ [1]
+ [1,1]
+ [1,2,1]
+ [1,3,3,1]
+]
+```
+
+### 解决方案<mark style="color:green;">（标准解决）</mark>
+
+```java
+public class Solution {
+    /**
+     * @param n: a Integer
+     * @return: the first n-line Yang Hui's triangle
+     */
+    public List<List<Integer>> calcYangHuisTriangle(int n) {
+        List<List<Integer> > res = new ArrayList<>();
+        int i, j;
+        if (n == 0) {
+            return res;
+        }
+        
+        for (i = 0; i < n; ++i) {
+            List<Integer> t = new ArrayList<Integer>();
+            t.add(1);   
+            for (j = 1; j < i; ++j) {
+                t.add(res.get(i - 1).get(j - 1) + res.get(i - 1).get(j));    
+            }
+            
+            if (i > 0) {
+                t.add(1);
+            }
+            res.add(t);
+        }
+        return res;
+    }
+}
+```
+
+## 767 · 翻转数组<mark style="color:green;">（简单）</mark>
+
+### 题目要求
+
+原地翻转给出的数组 `nums`。<mark style="color:red;">不可以开辟额外的数组空间！</mark>
+
+```
+输入 : nums = [1,2,5]
+输出 : [5,2,1]
+```
+
+### 解决方案
+
+同样是双指针思想来解决问题
+
+```java
+public class Solution {
+    /**
+     * @param nums: a integer array
+     * @return: nothing
+     */
+    public void reverseArray(int[] nums) {
+        // write your code here
+        // 如果是长度为0或1的数组，就没必要继续进行操作
+        if (nums.length == 0 || nums.length == 1) {
+            return;
+        }
+        // 设置两个指针
+        int left = 0, right = nums.length - 1;
+        // 对两个指针所在位置的值进行交换
+        // left <= right: 这是因为要保证奇数个元素时依旧可以对所有元素进行操作
+        while (left <= right) {
+            int temp = nums[left];
+            nums[left] = nums[right];
+            nums[right] = temp;
+            // 更新下一轮left和right的位置
+            left += 1;
+            right -= 1;
+        }
+    }
+}
+```
+
+## 539 · 移动零<mark style="color:green;">（简单）</mark>
+
+### 题目要求
+
+给一个数组 _nums_ 写一个函数将 `0` 移动到数组的最后面，非零元素保持原数组的顺序。必须在原数组上操作，最小化操作数。
+
+```
+输入: nums = [0, 1, 0, 3, 12],
+输出: [1, 3, 12, 0, 0].
+```
+
+### 解决方案（我自己的）
+
+类似于冒泡算法，将0“冒泡”到最后，<mark style="color:red;">但这个算法不是最优解！</mark>&#x20;
+
+```java
+public class Solution {
+    /**
+     * @param nums: an integer array
+     * @return: nothing
+     */
+    public void moveZeroes(int[] nums) {
+        // write your code here
+        for (int i = 0; i < nums.length - 1; i++) {
+            for (int j = i; j < nums.length - 1; j++) {
+                if (nums[j] == 0) {
+                    swap(nums, j, j + 1);
+                }
+            }
+        }
+    }
+
+    private void swap(int[] arr, int indexA, int indexB) {
+        int temp = arr[indexA];
+        arr[indexA] = arr[indexB];
+        arr[indexB] = temp;
+    }
+}
+```
+
+### 解决方案（<mark style="color:green;">排名第一</mark>）
+
+```java
+public class Solution {
+    /**
+     * @param nums an integer array
+     * @return nothing, do this in-place
+     */
+    public void moveZeroes(int[] nums) {
+        // Write your code here
+        int left = 0, right = 0;
+        while (right < nums.length) {
+            if (nums[right] != 0) {
+                int temp = nums[left];
+                nums[left] = nums[right];
+                nums[right] = temp;
+                left++;
+            }
+            right++;
+        }
+    }
+}
+```
+
+## 479 · 数组第二大数<mark style="color:green;">（简单）</mark>
+
+### 题目要求
+
+在数组中找到第二大的数。
+
+```
+输入：[1,3,2,4]
+输出：3
+```
+
+### 解决方案（<mark style="color:purple;">最简单但非最佳</mark>）
+
+```java
+public class Solution {
+    /**
+     * @param nums: An integer array
+     * @return: The second max number in the array.
+     */
+    public int secondMax(int[] nums) {
+        // write your code here
+        Arrays.sort(nums);
+        int targetIndex = nums.length - 2;
+        return nums[targetIndex];
+    }
+}
+```
+
+
+
+## 235 · 分解质因数<mark style="color:green;">（简单）</mark><mark style="color:purple;">(需要复习)</mark>
+
+### 题目要求
+
+将一个整数分解为若干质因数之乘积。
+
+```
+输入：660
+输出：[2, 2, 3, 5, 11]
+```
+
+### 解决方案
+
+质因数：每个合数都可以写成几个质数（也可称为素数）相乘的形式 ，这几个质数就都叫做这个合数的质因数。
+
+* 从小到大遍历\[2,upperLimit]，若num能够被i整除则循环除以i直到不能被整除，每次除以i都向答案值数组增加一个i，因为是从小到大遍历，则必定只有质数能被取为因数
+* upperLimit一般设定为$$num^2$$，因为一个数大于其根号的质因数最多只有一个，那么遍历其根号内的数可以将时间复杂度减小至根号n，若遍历完prime后该数不为1，则其值为最后一个质因数
+
+```java
+public class Solution {
+    /**
+     * @param num an integer
+     * @return an integer array
+     */
+    public List<Integer> primeFactorization(int num) {
+        List<Integer> factors = new ArrayList<Integer>();
+        for (int i = 2; i * i <= num; i++) {
+            while (num % i == 0) {
+                num = num / i;
+                factors.add(i);
+            }
+        }
+        //若最后剩余数不为1，则为最后一个质因数
+        if (num != 1) {
+            factors.add(num);
+        }   
+        return factors;
+    }
+}
+```
+
+## 407 · 加一<mark style="color:green;">（简单）</mark><mark style="color:purple;">（有难度）</mark>
+
+### 题目要求
+
+给定一个非负数，表示一个数字数组，在该数的基础上+1，返回一个新的数组。
+
+该数字按照数位高低进行排列，最高位的数在列表的最前面。
+
+```
+输入：[1,2,3]
+输出：[1,2,4]
+
+输入：[9,9,9]
+输出：[1,0,0,0]
+```
+
+### 解决方案
+
+```java
+public class Solution {
+    /**
+     * @param digits: a number represented as an array of digits
+     * @return: the result
+     */
+    public int[] plusOne(int[] digits) {
+        
+        // 加一的“1”
+        int extra = 1;
+        // 对于数组从后向前取
+        for (int i = digits.length - 1; i >= 0; i--) {
+            // 每一位都要加一
+            int sum = digits[i] + extra;
+            // 这一位的值由(sum/10)的余数计算而来
+            // if 1~9 -> 1~9 ; if 10 -> 0
+            digits[i] = sum % 10;
+            // 这里的sum/10决定了只有发生“进位”时(sum=10)才能进入下一次循环判断前一位数是否需要更新
+            extra = sum / 10;
+            // 如果不进位(extra为0，例如8/10=0)，就直接跳出循环
+            if (extra == 0) {
+                break;
+            }
+        }
+        // 接上面：如果没有进位发生，就直接结束程序
+        if (extra == 0) {
+            return digits;
+        }
+        // 如果原数组全都进位了(999->1000)，新数组的长度则加一
+        // 若全都进位，则上面的for-loop产生三个0，并且extra为1，不满足extra为0的情况，所以length + 1
+        int[] result = new int[digits.length + 1];
+        // 新数组的第一位填充1
+        result[0] = 1;
+        return result;
+    }
+}
+```
+
+## 220 · 冰雹猜想<mark style="color:green;">（简单）</mark>
+
+### 题目要求
+
+数学家们曾提出一个著名的猜想——冰雹猜想。 对于任意一个自然数N，如果N是偶数，就把它变成N / 2； 如果N是奇数，就把它变成 3 \* N+1。 按照这个法则运算下去，最终必然得1。 试问，该数通过几轮变换，会变成1呢？
+
+```
+输入： 
+4
+输出： 
+2
+解释： 
+第一轮：4/2=2
+第二轮：2/2=1
+答案为2
+```
+
+### 解决方案
+
+这个题不难，判断一下奇数偶数，分别进行计算就可以了。当num=1的时候循环停止。计数器需要从0开始，因为需要进行完首轮奇偶判断才能定义为“一次”。
+
+```java
+public class Solution {
+    /**
+     * @param num: an integer
+     * @return: return an integer
+     */
+    public int getAnswer(int num) {
+        int count = 0;
+
+        while (num != 1) {
+            if (num % 2 == 0) {
+                num = num / 2;
+            } else {
+                num = 3 * num + 1;
+            }
+            
+            count += 1;
+        }
+
+        return count;
+    }
+}
+```
+
+## 53 · 翻转字符串<mark style="color:green;">（简单）</mark>
+
+### 题目要求
+
+给定一个字符串，逐个翻转字符串中的每个单词。
+
+```
+s = "the sky is blue"
+"blue is sky the"
+```
+
+### 解决方案
+
+```java
+public class Solution {
+    /*
+     * @param s: A string
+     * @return: A string
+     */
+    public String reverseWords(String s) {
+        // write your code here
+        if (s == "") {
+            return s;
+        }
+        // 按照空格分隔，允许多次匹配空格(错误示范：.split(" "))
+        String[] afterSplit = s.trim().split("\\s+");
+        // 删除每个单词后的标点（如果有）
+        for (String string : afterSplit) {
+            string = string.replaceAll("([a-z]+)[?:!.,;]*", "$1");
+        }
+        // 双指针做前后交换，实现翻转
+        int left = 0, right = afterSplit.length - 1;
+
+        while (left <= right) {
+            String temp = afterSplit[left];
+            afterSplit[left] = afterSplit[right];
+            afterSplit[right] = temp;
+
+            left++;
+            right--;
+        }
+        // 将反转后的array中的每个元素添加到builder
+        StringBuilder builder = new StringBuilder();
+        for (String str : afterSplit) {
+            builder.append(str).append(" ");
+        }
+        // 删除最后一个空格并return
+        return builder.toString().trim();
+    }
+}
+```
+
 ## Question Title
 
 ### 题目要求
 
 
 
-### 解决方案&#x20;
+### 解决方案
 
 ## Question Title
 
