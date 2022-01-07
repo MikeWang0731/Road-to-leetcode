@@ -788,18 +788,214 @@ public class Solution {
 }
 ```
 
-## Question Title
+## 50 · 数组剔除元素后的乘积题目要求<mark style="color:green;">（简单）</mark>
+
+给定一个整数数组`A`。\
+定义$$B[i] = A[0] * ... * A[i-1] * A[i+1] * ... * A[n-1]B[i]=A[0]∗...∗A[i−1]∗A[i+1]∗...∗A[n−1]$$ 计算`B`的时候请不要使用除法。请输出`B`。
+
+```
+A = [1,2,3]
+Output = [6,3,2]
+B[0] = A[1] * A[2] = 6; B[1] = A[0] * A[2] = 3; B[2] = A[0] * A[1] = 2
+```
+
+### 解决方案
+
+暴力枚举，计算所有情况
+
+```java
+public class Solution {
+    /*
+     * @param nums: Given an integers array A
+     * @return: A long long array B and B[i]= A[0] * ... * A[i-1] * A[i+1] * ... * A[n-1]
+     */
+    public List<Long> productExcludeItself(List<Integer> nums) {
+        // 建立一个list保存答案
+        List<Long> resultB = new ArrayList<>();
+
+        // 一些特殊情况的判断
+        // Case 1：无元素
+        if (nums.size() == 0) {
+            resultB.add(new Integer(1).longValue());
+            return resultB;
+        } 
+        // case 2：只有一个元素（元素为0或其他）
+        if (nums.size() == 1 & nums.get(0) != 0) {
+            resultB.add(new Integer(nums.get(0)).longValue());
+            return resultB;
+        } else if (nums.size() == 1 & nums.get(0) == 0) {
+            resultB.add(new Integer(1).longValue());  // 其实这里并不是特别理解为什么有且只有一个元素0要返回1
+            return resultB;
+        }
+        // 暴力枚举：遍历数组里的所有数字，找到对于每个数字而言的所有情况
+        for (int currentIndex = 0; currentIndex < nums.size(); currentIndex++) {
+            long result = 1;  // 保存对于这个数字而言的答案
+            // 求出除了当前数字所有数字的乘积
+            for (int calIndex = 0; calIndex < nums.size(); calIndex++) {
+                if (calIndex == currentIndex) continue;
+                result = result * nums.get(calIndex);
+            }
+            // 加入到答案list
+            resultB.add(result);
+        }
+        return resultB;
+    }
+}
+```
+
+## 46 · 主元素<mark style="color:green;">（简单）</mark>
 
 ### 题目要求
 
+给定一个整型数组，找出主元素，它在数组中的出现次数大于数组元素个数的二分之一。
 
+```
+数组 = [1, 1, 1, 1, 2, 2, 2]
+output = 1
+```
 
-### 解决方案
+### 解决方案一 （我自己 - 使用HashMap）
 
-## Question Title
+```java
+public class Solution {
+    /*
+     * @param nums: a list of integers
+     * @return: find a  majority number
+     */
+    public int majorityNumber(List<Integer> nums) {
+        // write your code here
+        // <key,value>：key是唯一的，代表数字，value代表次数
+        HashMap<Integer,Integer> map = new HashMap<>();
+        for (int number : nums) {
+            if (map.containsKey(number)) {
+                // 如果出现过就更新value
+                map.put(number, map.get(number) + 1);
+            } else {
+               map.put(number, 1); 
+            }
+        }
+        // 找到最大的value
+        int maxShowUp = Collections.max(map.values());
+        // 保存最大value所在的index
+        int maxIndex = 0;
+        // 遍历values，找到index
+        for (int values : map.values()) {
+            if (values == maxShowUp) break;
+            maxIndex += 1;
+        }
+        // 遍历keys，找到最大value对应的key
+        int maxKey = 0;
+        int count = 0;
+        for (int key: map.keySet()) {
+            if (count == maxIndex) {
+                maxKey = key;
+            }
+            count++;
+        }
+
+        return maxKey;
+    }
+}
+```
+
+### 解决方案二 （使用排序 - 最简单）
+
+可以排序的情况下，代码只需要两行&#x20;
+
+因为占1/2以上的数一定是主元素，数组中间那个数也一定是它
+
+时间复杂度 $$O(nlogn)$$空间复杂度$$O(1)$$
+
+```java
+public class Solution {
+    /*
+     * @param nums: a list of integers
+     * @return: find a  majority number
+     */
+    public int majorityNumber(List<Integer> nums) {
+        Collections.sort(nums);
+        return nums.get(nums.size()/2);
+    }
+}
+```
+
+### 解决方案三 （标准方案）
+
+这相当于遍历数组中的所有元素，只要元素出现的次数够多，它的count在经历过众多加减之后依旧大于0
+
+```java
+public class Solution {
+
+    public int majorityNumber(List<Integer> nums) {
+        
+        int currentMajor = 0;
+        int count = 0;
+        
+        for(Integer num : nums) {
+            if(count == 0) {
+                currentMajor = num;
+            }
+            
+            if(num == currentMajor) {
+                count++;
+            } else {
+                count--;
+            }
+        }
+        
+        return currentMajor;
+    }
+}
+```
+
+## 9 · Fizz Buzz 问题<mark style="color:green;">（简单）</mark>
 
 ### 题目要求
 
+给定整数 _n_ ，按照如下规则打印从 _1_ 到 _n_ 的每个数：
 
+* 如果这个数被3整除，打印`fizz`。
+* 如果这个数被5整除，打印`buzz`。
+* 如果这个数能同时被`3`和`5`整除，打印`fizz buzz`。
+* 如果这个数既不能被 `3` 整除也不能被 `5` 整除，打印数字`本身`。
+
+```
+input = 15
+[
+  "1", "2", "fizz",
+  "4", "buzz", "fizz",
+  "7", "8", "fizz",
+  "buzz", "11", "fizz",
+  "13", "14", "fizz buzz"
+]
+```
 
 ### 解决方案
+
+注意条件的判断顺序，例如：15一旦被判断为可以被3或被5整除，那么就不会被判断为可以同时被整除！
+
+条件要由小到大写！
+
+```java
+public class Solution {
+    /**
+     * @param n: An integer
+     * @return: A list of strings.
+     */
+    public List<String> fizzBuzz(int n) {
+        // write your code here
+        List<String> result = new ArrayList<>();
+        for (int element = 1; element <= n; element++) {
+            if (element % 3 == 0 & element % 5 == 0) {
+                result.add("fizz buzz");
+            } else if (element % 3 == 0 || element % 5 == 0) {
+                String input = element % 3 == 0 ? "fizz":"buzz";
+                result.add(input);
+            } else {
+                result.add(String.valueOf(element));
+            }
+        }
+        return result;
+    }
+}
+```
