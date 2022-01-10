@@ -512,7 +512,7 @@ public class Solution {
 }
 ```
 
-## 353 · 最大字母
+## 353 · 最大字母<mark style="color:green;">（简单）</mark>
 
 ### 题目要求
 
@@ -575,11 +575,55 @@ public class Solution {
 }
 ```
 
-## 题目
+## 8 · 旋转字符串<mark style="color:green;">（简单）</mark>
 
 ### 题目要求
 
+给定一个字符串`str`和一个偏移量，根据偏移量`原地旋转`字符串(从左向右旋转)。
 
+```
+str = "abcdefg"
+offset = 3
+output = "efgabcd"
+```
 
 ### 解决方案
+
+三步翻转法
+
+1. 不变的部分进行翻转
+2. 变的部分进行翻转
+3. 整体进行翻转
+
+```java
+/public class Solution {
+    /**
+     * @param str: an array of char
+     * @param offset: an integer
+     * @return: nothing
+     */
+    public void rotateString(char[] str, int offset) {
+        // write your code here
+        // 边界情况
+        if (str == null || str.length == 0)
+            return;
+        // 求出真正有效的offset 
+        offset = offset % str.length;
+        // Step 1：不变的部分进行翻转 (abcd - dcba)
+        reverse(str, 0, str.length - offset - 1);
+        // Step 2：偏移的部分进行翻转 (efg - gfe)
+        reverse(str, str.length - offset, str.length - 1);
+        // Step 3：整体翻转 (dcbagfe - efgabcd)
+        reverse(str, 0, str.length - 1);
+    }
+    
+    private void reverse(char[] str, int start, int end) {
+        for (int i = start, j = end; i < j; i++, j--) {
+            char temp = str[i];
+            str[i] = str[j];
+            str[j] = temp;
+        }
+    }
+}
+```
 
