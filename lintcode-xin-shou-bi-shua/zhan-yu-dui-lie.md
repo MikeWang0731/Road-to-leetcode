@@ -156,7 +156,7 @@ public class MyQueue {
 }
 ```
 
-## 423 · 有效的括号序列
+## 423 · 有效的括号序列<mark style="color:green;">（简单）</mark>
 
 ### 题目要求
 
@@ -206,7 +206,7 @@ public class Solution {
 
 ```
 
-## 263 · 小括号匹配
+## 263 · 小括号匹配<mark style="color:green;">（简单）</mark>
 
 ### 题目要求
 
