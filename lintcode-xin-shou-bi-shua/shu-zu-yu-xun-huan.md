@@ -77,7 +77,7 @@ public class Solution {
             A[index2] = tmp;
         }
     }
-}java
+}
 ```
 
 ## 463 · 整数排序<mark style="color:blue;">（入门）</mark>
