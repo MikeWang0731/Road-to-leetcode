@@ -11,4 +11,5 @@
 
 ## 🤩 LeetCode
 
+* [💡 数组/链表](leetcode/shu-zu-lian-biao.md)
 * [二分搜索法](leetcode/er-fen-sou-suo-fa.md)
