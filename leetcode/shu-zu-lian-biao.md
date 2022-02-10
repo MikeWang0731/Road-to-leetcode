@@ -107,16 +107,41 @@ class NumArray {
 输出：2
 [1*,1*,1] -> 第一组
 [1,1*,1*] -> 第二组
+
+输入：nums = [1,2,3], k = 3
+输出：2
+[1, 2] -> 3
+[3] -> 3
 ```
 
 ### 解决方案（前缀和）
 
 {% hint style="info" %}
-前缀和的核心是
+前缀和的核心是:`preSum[n] - preSum[n-1]，前缀和定义是：preSum[i]是指原数组[0..i-1]的所有元素的累加和`
 {% endhint %}
 
+以往我们会使用双指针的方法对所有可能的区间进行检索，若满足`preSum[i]-preSum[j] = k`则说明有连续的子数组的和为整数`k`，我们就将结果计数器加一。但是这需要两重循环，影响效率。**所以我们提出以下优化思路：**<mark style="color:green;">将上述公式移项得到</mark>`preSum[j] = preSum[i]-k`，这样就变成了“如果`preSum[j]`<mark style="color:red;">是0或者k本身</mark>，那么就说明我们找到了连续数组” 。<mark style="color:red;">并且我们将所有的前缀和都添加到HashMap中，key为前缀和本身，value是它出现的次数</mark>。这样我们就只需要一个for循环。
+
+为什么可以这样说？假设`k=3`，某一轮`preSum[i] = 3`，那么此时preSum\[j]就是`3-3=0`，这就说明，前缀和累加到`nums[i-1]`这一位时，连续数组和刚好满足要求，符合题目条件。此时`count++`。这是Case 1.
+
+当然，还有第二种情况，即Case2，如果某轮`preSum[i]-k`的差是`k`本身，则说明`preSum[i]`和`preSum[i-1]`之间刚好差了一个`k`。即这一轮`preSum[i]`中新加入元素`nums[i-1]`的值刚好和k一样，`nums[i-1]`它自己就独立满足条件。此时`count++`。
+
+```
+nums: [1, 2, 3], k = 3
+preSum: [0, 1, 3, 6]
+--------------
+Case 1: preSum[i] - k = 0
+preSum[2] = 3, k = 3, sum_j = 0
+preSum[2] = nums[0] + nums[1] = 1 + 2 = 3 [Satisfy requirement]
+--------------
+Case 2: preSum[i] - k = k
+preSum[3] = 6, k = 3, sum_j = 6 - 3 = 3
+preSum[3] = nums[0] + nums[1] + nums[2] = preSum[2] + nums[2]
+That is, An independent nums[2] also satisfy the requirement
+```
+
 ```java
-class Solution {
+ class Solution {
 
     public int subarraySum(int[] nums, int k) {
         // key: <Sum, 出现次数>
@@ -131,17 +156,17 @@ class Solution {
         for (int i = 0; i < nums.length; i++) {
             // 当前一轮的前缀和
             sum_i = sum_i + nums[i];
-            // 这是我们想找的前缀和的变体sum_j
+            // 这是我们用来做“减法”的前缀和preSum[j]的变体
             // if (sum_i - sum_j == k) count++; 多项式移项
             int sum_j = sum_i - k;
-            // 如果map里出现过我们想要的结果，我们就更新结果
+            // 如果map的key里出现过和sumj一样的数值，我们就更新结果
             if (preSum.containsKey(sum_j)) {
                 resultCount = resultCount + preSum.get(sum_j);
             }
-            // 每轮结束时，将当前的前缀和加入到hashmap并记录次数+1
+            // 每轮结束时，将当前这一轮的前缀和加入到hashmap并记录次数+1
             // getOrDefault()，返回某个特定key的value，若map不到这个key，则用default值替代
             preSum.put(sum_i, preSum.getOrDefault(sum_i, 0) + 1);
-        }
+        } 
 
         return resultCount;
     }
