@@ -160,6 +160,7 @@ That is, An independent nums[2] also satisfy the requirement
             // if (sum_i - sum_j == k) count++; 多项式移项
             int sum_j = sum_i - k;
             // 如果map的key里出现过和sumj一样的数值，我们就更新结果
+            // "sumj一样的数值"就是被记录过的符合条件的前缀和(sum_i)
             if (preSum.containsKey(sum_j)) {
                 resultCount = resultCount + preSum.get(sum_j);
             }
@@ -172,3 +173,215 @@ That is, An independent nums[2] also satisfy the requirement
     }
 }
 ```
+
+## 1109. 航班预订统计<mark style="color:yellow;">（Medium）</mark>
+
+这里有 `n` 个航班，它们分别从 `1` 到 `n` 进行编号。
+
+有一份航班预订表 `bookings` ，表中第 `i` 条预订记录 `bookings[i] = [first, last, seats]` 意味着在从 `first` 到 `last` （**包含** `first` 和 `last` ）的 **每个航班** 上预订了 `seats` 个座位。
+
+请你返回一个长度为 `n` 的数组 `answer`，里面的元素是每个航班预定的座位总数。
+
+```
+输入：bookings = [[1,2,10],[2,3,20],[2,5,25]], n = 5
+输出：[10,55,45,25,25]
+解释：
+航班编号        1   2   3   4   5
+预订记录 1 ：   10  10
+预订记录 2 ：       20  20
+预订记录 3 ：       25  25  25  25
+总座位数：      10  55  45  25  25
+因此，answer = [10,55,45,25,25]
+```
+
+### 解决方案（差分数组）
+
+{% hint style="warning" %}
+**前缀和**主要适⽤的场景是**原始数组不会被修改**的情况下，频繁查询某个区间的累加和。**差分数组**的主要适⽤场景是**频繁对原始数组的某个区间的元素进行增减**。
+{% endhint %}
+
+{% hint style="info" %}
+差分数组是指新建一个数组`diff[]`用于<mark style="color:green;">记录原数组</mark><mark style="color:green;">`nums[]`</mark><mark style="color:green;">的每个元素之间的差值</mark>。例如`nums = [8, 5, 9, 6 ,1]`，那么`diff = [8, -3, 4, -3, -5]`。通过观察`diff[]`我们发现`diff`和`nums`的首元素都是相同的，这是因为首元素没有前序元素，没有办法记录差值。但是，`diff`中从第二个元素开始，记录的就是<mark style="color:green;">`nums`</mark><mark style="color:green;">第二个元素减去第一个元素的差值</mark>，即`diff[i] = nums[i] - nums[i-1]`。
+
+\---------------------
+
+`diff[1] = -3 = nums[1] - nums[0] = 5 - 8 = -3`
+
+\---------------------
+
+同理，我们也可以通过`diff`数组反推出原数组或更新差值后的数组，我们将结果保存至新数组`result[]`中，其中`result`的首元素和`diff`的首元素保持一致。<mark style="color:green;">`result`</mark><mark style="color:green;">数组从第二个元素开始就是</mark><mark style="color:green;">`result`</mark><mark style="color:green;">的前一个元素加上</mark><mark style="color:green;">`diff`</mark><mark style="color:green;">中的差值</mark>，即不断用之前的累加和加上新元素和上一个元素的差值来求出新的元素的值。即`result[i] = result[i-1] + diff[i]`。
+
+\---------------------
+
+`result = [8, 0, 0, 0, 0]`
+
+`result[1] = result[0] + diff[1] = 8 + (-3) = 5`
+
+So, new `result = [8, 5, 0, 0, 0]`
+
+\---------------------
+
+在差分数组`diff`处理区间元素增减时，我们并不需要`for`循环对元素差值逐个操作，这是因为如果某个差值`diff[i]`变大(e.g., 1->3)，在反推结果数组时，会<mark style="color:green;">导致这个</mark><mark style="color:green;">`diff[i]`</mark><mark style="color:green;">所对应的结果</mark><mark style="color:green;">`result[i]`</mark><mark style="color:green;">及它之后的所有数字都会增大，</mark><mark style="color:green;">`即nums[i..]都会增加val。`</mark>所以我们要<mark style="color:green;">在区间结束的后一位差值</mark><mark style="color:green;">`diff[i+1]`</mark><mark style="color:green;">上减去这个差值的变化</mark><mark style="color:green;">`val，`</mark><mark style="color:green;">这样才能保证</mark><mark style="color:green;">`diff[i+1]之后的数字不会变化`</mark>`。`即 `diff[i] = diff[i] + val; diff[j+1] = diff[j+1] - val;`
+
+\---------------------
+
+`diff = [8, -3, 4, -3, -5] -> nums从第2到4增加2 -> [8, -1, 4, -3, -7]`
+
+`result = [8, 7, 11, 8, 1] / nums = [8, 5, 9, 6, 1]`
+{% endhint %}
+
+```java
+class Solution {
+    // 差分数组内部类
+    class Difference {
+        int[] diffArray;
+
+        // 构建差分数组
+        public Difference(int[] arr) throws IllegalArgumentException {
+            if (arr.length <= 0) {
+                throw new IllegalArgumentException("Length <= 0!");
+            }
+            diffArray = new int[arr.length];
+            diffArray[0] = arr[0];
+            for (int i = 1; i < arr.length; i++) {
+                diffArray[i] = arr[i] - arr[i - 1];
+            }
+        }
+
+        // 处理数组区间值增减(这里的index从0开始，val可以为负)
+        public void increment(int index_i, int index_j, int val) {
+            diffArray[index_i] += val;
+            if (index_j + 1 < diffArray.length) {
+                diffArray[index_j + 1] -= val;
+            }
+        }
+
+        // 返回结果数组
+        public int[] result() {
+            int[] result = new int[diffArray.length];
+            result[0] = diffArray[0];
+            for (int i = 1; i < diffArray.length; i++) {
+                result[i] = result[i - 1] + diffArray[i];
+            }
+            return result;
+        }
+    }
+
+    public int[] corpFlightBookings(int[][] bookings, int n) {
+        // 初始化arr = [0,0,0,0,0]
+        // 五个0分别代表航班1-5的初始售出座位数
+        int[] arr = new int[n];
+        Difference difference = new Difference(arr);
+        // 拿到bookings中每个子数组，
+        for (int[] booking : bookings) {
+            // 这里减一是因为航班序号从1开始，但是数组下标从0开始
+            int index_i = booking[0] - 1;
+            int index_j = booking[1] - 1;
+            int val = booking[2];
+            difference.increment(index_i, index_j, val);
+        }
+
+        return difference.result();
+    }
+}
+```
+
+## 1094. 拼车<mark style="color:yellow;">（Medium）</mark>
+
+假设你是一位顺风车司机，车上最初有 `capacity` 个空座位可以用来载客。由于道路的限制，车 **只能** 向一个方向行驶（也就是说，**不允许掉头或改变方向**，你可以将其想象为一个向量）。
+
+这儿有一份乘客行程计划表 `trips[][]`，其中 `trips[i] = [num_passengers, start_location, end_location]` 包含了第 `i` 组乘客的行程信息：
+
+* 必须接送的乘客数量；
+* 乘客的上车地点；
+* 以及乘客的下车地点。
+
+这些给出的地点位置是从你的 **初始** 出发位置向前行驶到这些地点所需的距离（它们一定在你的行驶方向上）。
+
+请你根据给出的行程计划表和车子的座位数，来判断你的车是否可以顺利完成接送所有乘客的任务（当且仅当你可以在所有给定的行程中接送所有乘客时，返回 `true`，否则请返回 `false`）。
+
+```
+输入：trips = [[2,1,5],[3,3,7]], capacity = 4
+输出：false
+
+因为车上一共4个座位，从第1站上来2人到第5站下车，所以在1-4站之间车上一共有2个空座。然而，
+第3站上来3个人，坐不下，超载，故false
+```
+
+{% hint style="info" %}
+这道题的核心是判断到达每一站时车上的乘客会不会超载，计算每一站上车下车的人的数量，即对一个区间内的数组进行加减法，我们可以使用**差分数组**技巧。
+{% endhint %}
+
+### 解决方案（差分数组）
+
+```java
+class Solution {
+    class Difference {
+        int[] diffArray;
+
+        public Difference(int[] arr) throws IllegalArgumentException {
+            if (arr.length <= 0) {
+                throw new IllegalArgumentException("Length <= 0");
+            }
+            diffArray = new int[arr.length];
+            diffArray[0] = arr[0];
+            for (int i = 1; i < arr.length; i++) {
+                diffArray[i] = arr[i] - arr[i - 1];
+            }
+        }
+
+        public void increament(int index_i, int index_j, int val) {
+            diffArray[index_i] += val;
+            if (index_j + 1 < diffArray.length) {
+                diffArray[index_j + 1] -= val;
+            }
+        }
+
+        public int[] result() {
+            int[] result = new int[diffArray.length];
+            result[0] = diffArray[0];
+            for (int i = 1; i < diffArray.length; i++) {
+                result[i] = result[i - 1] + diffArray[i];
+            }
+            return result;
+        }
+    }
+
+    public boolean carPooling(int[][] trips, int capacity) {
+        int[] arr = new int[1000];
+        Difference difference = new Difference(arr);
+        for (int[] singleTrip : trips) {
+            // 为什么i不需要-1而j需要
+            // 这是因为我们记录的是”乘客在车上的区间“
+            // 从i站上车，此时乘客于i站存在于车上
+            int index_i = singleTrip[1];
+            // 于j站下车，到达j站时已经不在车上
+            // 所以在车上的区间为[i..j-1]
+            int index_j = singleTrip[2] - 1;
+            int val = singleTrip[0];
+            difference.increament(index_i, index_j, val);
+        }
+
+        // 将所有情况计算完查看最后的结果
+        // arr记录着停靠每一站时车上的旅客数量
+        arr = difference.result();
+
+        for (int i = 0; i < arr.length; i++) {
+            // 如果最终结果为超载，则不能顺利接送所有乘客
+            // arr[i] = 在第i站时，车上有多少人
+            if (arr[i] > capacity) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+{% hint style="danger" %}
+```
+为什么i不需要-1而j需要？这是因为我们记录的是“乘客在车上的区间”，某乘客从i站上车，
+此时乘客于i站存在于车上；该乘客于j站下车，到达j站时已经不在车上，所以在车上的
+区间为[i..j-1]
+```
+{% endhint %}
