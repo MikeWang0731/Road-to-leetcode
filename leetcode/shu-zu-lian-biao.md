@@ -381,3 +381,135 @@ class Solution {
 {% hint style="danger" %}
 第36行`for`循环：为什么`i`不需要`-1`而`j`需要？这是因为我们记录的是“乘客在车上的区间”。某乘客从`i`站上车，此时乘客于`i`站开始存在于车上；后来该乘客于`j`站下车，到达`j`站时已经不在车上。所以在车上的区间为`[i..j-1]`。
 {% endhint %}
+
+## 141. 环形链表<mark style="color:green;">（Easy）</mark>
+
+给你一个链表的头节点 `head` ，判断链表中是否有环。
+
+如果链表中有某个节点，可以通过连续跟踪 `next` 指针再次到达，则链表中存在环。 为了表示给定链表中的环，评测系统内部使用整数 `pos` 来表示链表尾连接到链表中的位置（索引从 0 开始）。**注意：`pos` 不作为参数进行传递** 。仅仅是为了标识链表的实际情况。
+
+_如果链表中存在环_ ，则返回 `true` 。 否则，返回 `false` 。
+
+![](../.gitbook/assets/image.png)
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：true
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+对于这种判断链表是否含环的问题，我们可以引入**快慢指针技巧**。
+
+### 解决方案（快慢指针）
+
+{% hint style="info" %}
+**快慢指针**的意思是，我们初始化两个指针，<mark style="color:green;">`fast`</mark><mark style="color:green;">和</mark><mark style="color:green;">`slow`</mark><mark style="color:green;">，以不同的速度从</mark><mark style="color:green;">`head`</mark><mark style="color:green;">同时开始遍历链表</mark>。<mark style="color:red;">若链表有环，则</mark><mark style="color:red;">`fast`</mark><mark style="color:red;">和</mark><mark style="color:red;">`slow`</mark><mark style="color:red;">终有一刻可以相遇</mark>。即当`fast==slow`的时候，我们就认为链表有环。
+{% endhint %}
+
+```java
+public class Solution {
+    public boolean hasCycle(ListNode head) {
+        // 双指针：一快一慢
+        ListNode fast;
+        ListNode slow;
+        // 初始化双指针位置
+        fast = slow = head;
+        // 使用while循环进行链表遍历
+        // 当且仅当：1-不为空 且 2-不只有一个元素 时才执行循环
+        while (fast != null && fast.next != null) {
+            // 快指针一次走两步，慢指针是一步
+            fast = fast.next.next;
+            slow = slow.next;
+            // 如果快慢指针相遇，则链表有环
+            if (fast == slow) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+## 142. 环形链表II<mark style="color:yellow;">（Medium）</mark>
+
+给定一个链表的头节点  `head` ，返回链表开始入环的第一个节点。 _如果链表无环，则返回 `null`。_
+
+如果链表中有某个节点，可以通过连续跟踪 `next` 指针再次到达，则链表中存在环。 为了表示给定链表中的环，评测系统内部使用整数 `pos` 来表示链表尾连接到链表中的位置（**索引从 0 开始**）。如果 `pos` 是 `-1`，则在该链表中没有环。**注意：`pos` 不作为参数进行传递**，仅仅是为了标识链表的实际情况。
+
+{% hint style="warning" %}
+这道题和141题的区别就是，141题要判断链表有没有环，142题要找到链表环的起始点（如果有环的话）。
+{% endhint %}
+
+![](<../.gitbook/assets/image (1).png>)
+
+```
+输入：head = [3,2,0,-4], pos = 1
+输出：返回索引为 1 的链表节点
+解释：链表中有一个环，其尾部连接到第二个节点。
+```
+
+![](<../.gitbook/assets/image (2).png>)
+
+```
+输入：head = [1], pos = -1
+输出：返回 null
+解释：链表中没有环。
+```
+
+### 解决方案（快慢指针）
+
+{% hint style="info" %}
+这道题快慢指针的不同之处是我们需要在`fast`和`slow`相遇之处停止循环，随后重定向`slow`到`head`的位置，再让`slow`和`fast`同速前进，再次相遇之处就是环的起点。
+{% endhint %}
+
+假设第一次相遇时`slow`走了`k`步，那么`fast`一定走了`2k`步，因为`fast = fast.next.next`。那么`fast`多走出来的那`k`步其实就是在环里转圈的步数，且`k`就是环的长度的整数倍(1倍也算)。假设相遇点距环起点的距离为`m`，则环起点到`head`的距离则为`k-m`。也就是说，从`head`开始，走`k-m`步，就可以到达环的起点。
+
+```
+head ---- (k-m) ---- start ---- (m) ---- meet
+|-------------------(k)--------------------| 这k步也刚好是slow走过的距离
+```
+
+巧的是，如果从相遇点继续前进`k - m`步，也恰好到达环起点。不管`fast`在环里到底转了几圈，反正走`k`步可以到相遇点，那走`k - m`步一定就是走到环起点了。这样，在两指针相遇时，我们将`slow`重新初始化到`head`的位置，让两个指针同速前进，那么他们在`k - m`步之后就都会在环起点相遇，这是我们就得到了环起点。这也就解释了为什么当`slow`在`head`，`fast`在`meet`且他俩同速前进时会在环起点相遇。
+
+```
+meet ---- (k-m) ---- start ---- (m) ---- meet
+|------------------(k)--------------------|
+k相当于圆环的周长，从圆上任意一点走和周长相等的距离，就又回到了这个点。
+```
+
+{% hint style="warning" %}
+但是，如果说这个链表根本没有环呢？我们此时需要多加一步验证，在最开始我们初始化一个`flag=false`。即，<mark style="color:red;">如果</mark><mark style="color:red;">`fast`</mark><mark style="color:red;">和</mark><mark style="color:red;">`slow`</mark><mark style="color:red;">碰上了，</mark><mark style="color:red;">`flag`</mark><mark style="color:red;">为</mark><mark style="color:red;">`true`</mark><mark style="color:red;">时，我们才进行找起点的动作。</mark>否则，当`flag`在快慢指针搜寻结束时仍为`false`时，我们就返回`null`，程序终止。
+{% endhint %}
+
+```java
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        ListNode fast;
+        ListNode slow;
+        fast = slow = head;
+        // “有环”的象征
+        boolean flag = false;
+        // 快慢指针进行搜索
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            // 如果碰上了
+            if (fast == slow) {
+                flag = true; // “有环” = true
+                break; // 不再继续遍历，开始进行“找起点”操作
+            }
+        }
+        // 如果遍历完没碰上，即没有环，则返回null，因为没有起点
+        if (flag == false)
+            return null;
+        // 重新初始化slow到head的位置
+        slow = head;
+        // 同速搜索，当碰上的时候就是“起点”的位置
+        while (slow != fast) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
+}
+```
