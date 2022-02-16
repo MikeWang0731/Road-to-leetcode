@@ -11,6 +11,8 @@ coverY: 0
 
 数组链表的主要算法技巧是<mark style="color:orange;">双指针</mark>，双指针⼜分为<mark style="color:orange;">中间向两端扩散的双指针</mark>、<mark style="color:orange;">两端向中间收缩的双指针</mark>、<mark style="color:orange;">快慢指针</mark>。此外，数组还有<mark style="color:orange;">前缀和和差分数组</mark>也属于必知必会的算法技巧。
 
+**快慢指针**最神奇，链表操作无压力。归并排序找中点，链表成环搞判定。**左右指针**最常见，左右两端相向行。反转数组要靠它，二分搜索是弟弟。**滑动窗口**老猛男，子串问题全靠它。左右指针滑窗口，一前一后齐头进。
+
 ## 303. 区域和检索 - 数组不可变<mark style="color:green;">（Easy）</mark>
 
 给定一个整数数组  `nums`，处理以下类型的多个查询:
@@ -510,6 +512,95 @@ public class Solution {
             slow = slow.next;
         }
         return slow;
+    }
+}
+```
+
+## 876. 链表的中间结点 <mark style="color:green;">（Easy）</mark>
+
+给定一个头结点为 `head` 的非空单链表，返回链表的中间结点。
+
+如果有两个中间结点，则返回第二个中间结点。
+
+```
+输入：[1,2,3,4,5]
+输出：此列表中的结点 3 
+返回的以中间节点为首的子链表的形式：[3,4,5] -> 也叫序列化形式
+
+输入：[1,2,3,4,5,6]
+输出：此列表中的结点 4 (序列化形式：[4,5,6])
+由于该列表有两个中间结点，值分别为 3 和 4，我们返回第二个结点。
+```
+
+### 解决方案（快慢指针）
+
+{% hint style="info" %}
+这道题我们依旧使用快慢指针，只不过不用快慢指针来找环，而是用作普通遍历。
+{% endhint %}
+
+我们知道`fast`指针扫描的速度时`slow`指针的二倍，所以说，当`fast`指针扫描到尽头时，`slow`指针刚好停到链表中间的位置。这就像是长度10cm与5cm的关系。当链表的长度是奇数时，`slow`恰巧停在中点位置；如果长度是偶数，`slow`最终的位置是中间偏右。
+
+```java
+class Solution {
+    public ListNode middleNode(ListNode head) {
+        ListNode fast;
+        ListNode slow;
+        fast = slow = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
+}
+```
+
+## 19. 删除链表的倒数第 N 个结点<mark style="color:yellow;">（Medium）</mark>
+
+给你一个链表，删除链表的倒数第 `n` __ 个结点，并且返回链表的头结点。
+
+```
+输入：head = [1,2,3,4,5], n = 2
+输出：[1,2,3,5]
+
+输入：head = [1], n = 1
+输出：[]
+```
+
+### 解决方案（快慢指针）
+
+{% hint style="info" %}
+这一题的快慢定义有些许不同，不再是fast是slow的二倍，而是fast先行n次，然后slow再和fast同步前进。
+{% endhint %}
+
+为什么要`fast`要先行n次？<mark style="color:green;">这是因为</mark><mark style="color:green;">`fast`</mark><mark style="color:green;">先行n次之后，</mark><mark style="color:green;">`fast`</mark><mark style="color:green;">就领先</mark><mark style="color:green;">`slow`</mark><mark style="color:green;">n个位置。这样，当同步前进扫描时，</mark><mark style="color:green;">`fast`</mark><mark style="color:green;">到达终点之后，</mark><mark style="color:green;">`slow`</mark><mark style="color:green;">的位置刚好在待删除目标的前一个。</mark>那么，为什么是在目标的前一个？这是因为最开始先行的时候，`fast`是从链表的第2个元素开始数的(`while`循环)，假设`n=2`，那么`fast`最终会落到第三个元素上，此时`slow`还在第一个元素；这也就是说，当`fast`到达最后一个元素是，`slow`在倒数第三个元素，也就是待删除元素(倒数第二个)的前一个。
+
+```java
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode fast;
+        ListNode slow;
+        fast = slow = head;
+        // fast先行n步，这样当fast到达最后一个的时候，slow刚好在目标的前一个
+        while (n > 0) {
+            fast = fast.next;
+            n = n - 1;
+        }
+        // 如果fast先行期间就null了，说明一共就一个元素
+        if (fast == null) {
+            return head.next;
+        }
+        // 同时前进
+        // 当fast到达最后一个的时候，slow刚好在目标的前一个
+        while (fast != null && fast.next != null) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+        // 前一个.next = 前一个.next.next
+        // 即前一个元素直接连接上了它后面的后面那个元素
+        // 也就是待删除元素刚好被空了过去，置null，待GC回收
+        slow.next = slow.next.next;
+        return head;
     }
 }
 ```
