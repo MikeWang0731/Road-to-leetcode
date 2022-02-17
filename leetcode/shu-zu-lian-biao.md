@@ -604,3 +604,80 @@ class Solution {
     }
 }
 ```
+
+## 167. 两数之和II（Medium）
+
+给你一个下标从 1 开始的整数数组 `numbers` ，该数组已按 _****_** 非递减顺序排列**  ，请你从数组中找出满足相加之和等于目标数 `target` 的两个数。如果设这两个数分别是 `numbers[index1]` 和 `numbers[index2]` ，则 `1 <= index1 < index2 <= numbers.length` 。
+
+```
+输入：numbers = [2,7,11,15], target = 9
+输出：[1,2]
+解释：2 与 7 之和等于目标数 9 。因此 index1 = 1, index2 = 2 。返回 [1, 2] 。
+```
+
+{% hint style="warning" %}
+注意：这道题中返回的数字对应的下标不是从0开始，而数组默认下标从0开始。所以我们返回时结果要这样写：`[left+1, right+1]`
+{% endhint %}
+
+### 解决方案（左右指针）
+
+通过题目我们发现，数组**已经是递增排列**。我们可以利用这一特性采用<mark style="color:green;">双指针一左一右逐步向内收缩的思想来找到我们想要的答案</mark>。这就好比`[2, 7, 11, 15]`想要找到9，我们首先设定`left`指向2，`right`指向15。若此时结果大于目标，则说明两个加数有一个太大，我们可以将`right`的值缩小（因为数组右侧数字大）；同理，若小于目标则增大左侧。核心思想就是通过控制`left`和`right`来控制`sum`的大小。
+
+```java
+class Solution {
+    public int[] twoSum(int[] numbers, int target) {
+        // 初始化一左一右
+        int left = 0, right = numbers.length - 1;
+        // 循环的进行搜索
+        while (left < right) {
+            int result = numbers[left] + numbers[right];
+            if (result == target) {
+                return new int[] { left + 1, right + 1 };
+            } else {
+                // 如果“大了”就缩小右侧
+                if (result > target) {
+                    right--;
+                } else {
+                    // 反之增大左侧
+                    left++;
+                }
+            }
+        }
+        return new int[] { -1, -1 };
+    }
+}
+```
+
+## 344. 反转字符串<mark style="color:green;">（Easy）</mark>
+
+编写一个函数，其作用是将输入的字符串反转过来。输入字符串以字符数组 `s` 的形式给出。
+
+不要给另外的数组分配额外的空间，你必须**原地修改输入数组**、使用 O(1) 的额外空间解决这一问题。
+
+```
+输入：s = ["h","e","l","l","o"]
+输出：["o","l","l","e","h"]
+```
+
+### 解决方案（左右指针）
+
+这个题其实非常简单，我们只需要设置一左一右两指针分别从左右两端同时向内收缩，每一轮都交换他们对应指向的元素就可以了。
+
+```java
+class Solution {
+    public void reverseString(char[] s) {
+        int left = 0, right = s.length - 1;
+        while (left < right) {
+            swap(s, left, right);
+            left++;
+            right--;
+        }
+    }
+
+    private void swap(char[] arr, int left, int right) {
+        char temp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = temp;
+    }
+}
+```
